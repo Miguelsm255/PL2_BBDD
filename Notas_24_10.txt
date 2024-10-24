@@ -1,0 +1,20 @@
+-Esquema final -> Discos
+-Esquema temporal -> Discos_temp
+INSERT INTO Discos (título, año, url_cover, Artista)
+SELECT 
+ Título, Año, url_cover, Artista
+FROM 
+ Discos_temp JOIN Canciones_temp
+ON
+ _________________-
+
+
+REGEXP_SPLIT_TO_TABLE (Géneros, ',') <- Divide el atributo que sea por un caracter y los lleva a una tabla.
+
+_REPLACE
+_REGEXP_REPLACE
+
+MM:SS -> HH:MM:SS
+MAKE_INTERUAL
+CHAR_TO(    )24H:MM:SS
+::TIME
