@@ -102,6 +102,13 @@ CREATE TABLE IF NOT EXISTS Desea(
     CONSTRAINT fk_Usuario FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario),
     CONSTRAINT fk_Disco FOREIGN KEY(Título, Año_publicación) REFERENCES Disco(Título, Año_publicación)
 );
+CREATE TABLE IF NOT EXISTS Tiene(
+    Nombre_Usuario TEXT NOT NULL,
+    Título TEXT NOT NULL,
+    Año_publicación INT NOT NULL,
+    FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), CONSTRAINT pk_Usuario PRIMARY KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
+    FOREIGN KEY(Título, Año_publicación) REFERENCES Disco(Título, Año_publicación), CONSTRAINT pk_Disco PRIMARY KEY(Título, Año_publicación) REFERENCES Disco(Título, Año_publicación)
+);
 
 CREATE TABLE IF NOT EXISTS Usuario(
     Nombre_Usuario TEXT NOT NULL,
@@ -112,8 +119,8 @@ CREATE TABLE IF NOT EXISTS Usuario(
 );
 
 CREATE TABLE IF NOT EXISTS Ediciones(
-    Formato TEXT NOT NULL,    anio           TEXT 
-
+    Formato TEXT NOT NULL,    
+    Año TEXT, 
     País TEXT NOT NULL,
     Año_Edición INT NOT NULL,
     Título TEXT NOT NULL,
