@@ -5,7 +5,7 @@ BEGIN;
 CREATE SCHEMA IF NOT EXISTS ddbb;
 
 \echo 'creando la tabla películas'
-CREATE TABLE IF NOT EXISTS ddbb.películas(
+CREATE TABLE IF NOT EXISTS ddbb.disquería(
      año           TEXT 
     ,título        TEXT 
     ,géneros       TEXT
