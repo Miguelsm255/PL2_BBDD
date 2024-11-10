@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS Disco_temp(
 CREATE TABLE IF NOT EXISTS Canción_temp(
     id del disco INT NOT NULL,
     Título de la Canción TEXT NOT NULL,
-    duración INT, 
+    duración TIME, 
     CONSTRAINT Canción_temp_pk PRIMARY KEY(Título de la Canción, id del disco),
 );
 
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS Usuario_tiene_temp(
     tituloo del disco TEXT NOT NULL,
     año lanzamiento del disco INT NOT NULL,
     año edición INT,
-    país de edición TEXT,ç
+    país de edición TEXT,
     formato TEXT NOT NULL,
     estado TEXT NOT NULL,
     CONSTRAINT Usuario_temp_pk PRIMARY KEY(nombre de usuario, titulo del disco),
@@ -58,56 +58,60 @@ CREATE TABLE IF NOT EXISTS Usuario_temp(
     Nombre de usuario TEXT NOT NULL,
     email TEXT NOT NULL,
     contraseña TEXT NOT NULL,
-    CONSTRAINT Usuario_temp_pk PRIMARY KEY(nombre de usuario),
+    CONSTRAINT Usuario_temp_pk PRIMARY KEY(Nombre de usuario),
 );
-
 
 
 \echo 'Tablas temporales creadas. Procedemos a definir las tablas definitivas.'
 CREATE TABLE IF NOT EXISTS Disco(
-    Título TEXT NOT NULL,
+    Título_Disco TEXT NOT NULL,
     Año_publicación INT NOT NULL,
     URL_Portada TEXT,
-    CONSTRAINT Disco_pk PRIMARY KEY(Título, Año_publicación)
+    Nombre_Grupo TEXT NOT NULL,
+    CONSTRAINT Disco_pk PRIMARY KEY(Título_Disco, Año_publicación)
+    CONSTRAINT Grupo_fk FOREIGN KEY(Nombre_Grupo) REFERENCES Grupo(Nombre_Grupo)
+    ON DELETE CASCADE ON UPDATE CASCADE;
 );
 
 CREATE TABLE IF NOT EXISTS Canción(
-    Título TEXT NOT NULL,
-    Duración INT,
-    CONSTRAINT Canción_pk PRIMARY KEY(Título)
-);
-
-CREATE TABLE IF NOT EXISTS Géneros(
-    Nombre_Género TEXT NOT NULL,
-    CONSTRAINT Géneros_pk PRIMARY KEY(Nombre_Género)
+    Título_Canción TEXT NOT NULL,
+    Duración TIME,
+    Título_Disco TEXT NOT NULL,
+    CONSTRAINT Canción_pk PRIMARY KEY(Título_Canción)
+    CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco) REFERENCES Disco(Título_Disco)
 );
 
 CREATE TABLE IF NOT EXISTS Géneros_Disco(
-    Título TEXT NOT NULL,
-    Año_publicación INT NOT NULL,
     Nombre_Género TEXT NOT NULL,
-    CONSTRAINT Géneros_Disco_pk PRIMARY KEY(Título, Año_publicación, Nombre_Género),
-    CONSTRAINT fk_Disco FOREIGN KEY(Título, Año_publicación) REFERENCES Disco(Título, Año_publicación),
-    CONSTRAINT fk_Géneros FOREIGN KEY(Nombre_Género) REFERENCES Géneros(Nombre_Género)
+    Título_Disco TEXT NOT NULL,
+    Año_publicación INT NOT NULL,  
+    CONSTRAINT Géneros_Disco_pk PRIMARY KEY(Nombre_Género),
+    CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
 
 CREATE TABLE IF NOT EXISTS Grupo(
     Nombre_Grupo TEXT NOT NULL,
-    URL_Imagen TEXT,
+    URL_Imagen TEXT, NOT NULL,
     CONSTRAINT Grupo_pk PRIMARY KEY(Nombre_Grupo)
 );
 
-
 CREATE TABLE IF NOT EXISTS Desea(
-    CONSTRAINT fk_Usuario FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario),
-    CONSTRAINT fk_Disco FOREIGN KEY(Título, Año_publicación) REFERENCES Disco(Título, Año_publicación)
-);
-CREATE TABLE IF NOT EXISTS Tiene(
     Nombre_Usuario TEXT NOT NULL,
-    Título TEXT NOT NULL,
+    Título_Disco TEXT NOT NULL,
     Año_publicación INT NOT NULL,
-    FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), CONSTRAINT pk_Usuario PRIMARY KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
-    FOREIGN KEY(Título, Año_publicación) REFERENCES Disco(Título, Año_publicación), CONSTRAINT pk_Disco PRIMARY KEY(Título, Año_publicación) REFERENCES Disco(Título, Año_publicación)
+    CONSTRAINT Desea_pk PRIMARY KEY(Nombre_Usuario, Título_Disco, Año_publicación),
+    CONSTRAINT Usuario_fk FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
+    CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación),
+);
+
+CREATE TABLE IF NOT EXISTS Tiene(
+    Estado TEXT NOT NULL,
+    Nombre_Usuario TEXT NOT NULL,
+    Título_Disco TEXT NOT NULL,
+    Año_publicación INT NOT NULL,
+    CONSTRAINT Tiene PRIMARY KEY(Nombre_Usuario, Título_Disco, Año_publicación),
+    CONSTRAINT Usuario_fk FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
+    CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación), 
 );
 
 CREATE TABLE IF NOT EXISTS Usuario(
@@ -120,15 +124,18 @@ CREATE TABLE IF NOT EXISTS Usuario(
 
 CREATE TABLE IF NOT EXISTS Ediciones(
     Formato TEXT NOT NULL,    
-    Año TEXT, 
     País TEXT NOT NULL,
     Año_Edición INT NOT NULL,
-    Título TEXT NOT NULL,
-    CONSTRAINT Ediciones_pk PRIMARY KEY(Formato, Año_Edición),
-    CONSTRAINT fk_Disco FOREIGN KEY(Título, Año_publicación) REFERENCES Disco(Título, Año_publicación)
+    Título_Disco TEXT NOT NULL,
+    Año_publicación INT NOT NULL,
+    CONSTRAINT Ediciones_pk PRIMARY KEY(Formato, Año_Edición, País),
+    CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
 
 \echo 'Cargando datos.'
 \COPY Disco FROM 'Disco.csv' DELIMITER ',' CSV HEADER;
 \COPY Canción FROM 'Canciones.csv' DELIMITER ',' CSV HEADER;
 \COPY Géneros FROM 'Géneros.csv' DELIMITER ',' CSV HEADER;
+
+
+ROLLBACK; 

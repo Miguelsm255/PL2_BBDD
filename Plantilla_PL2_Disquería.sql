@@ -6,8 +6,8 @@ CREATE SCHEMA IF NOT EXISTS ddbb;
 
 \echo 'creando la tabla películas'
 CREATE TABLE IF NOT EXISTS ddbb.disquería(
-     año           TEXT 
-    ,título        TEXT 
+    año            TEXT 
+    ,título        TEXT
     ,géneros       TEXT
     ,puntuación    TEXT
     ,duración      TEXT
