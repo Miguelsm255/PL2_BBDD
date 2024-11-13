@@ -132,6 +132,49 @@ CREATE TABLE IF NOT EXISTS Ediciones(
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
 
+\echo 'Tablas creadas. Procedemos a unirlas.'
+INSERT INTO Disco(Título_Disco, Año_publicación, URL_Portada, Nombre_Grupo)
+SELECT DISTINCT "Nombre del disco", "fecha de lanzamiento", "url portada", "Nombre del grupo"
+FROM Disco_temp;
+
+INSERT INTO Canción(Título_Canción, Duración)
+SELECT DISTINCT "Título de la Canción", duración
+FROM Canción_temp;
+
+INSERT INTO Canción(Título_Disco)
+SELECT DISTINCT "Título del disco"
+FROM Disco_temp;
+
+INSERT INTO Géneros_Disco(Nombre_Género, Título_Disco, Año_publicación)
+SELECT DISTINCT "géneros", "Nombre del disco", "fecha de lanzamiento"
+FROM Disco_temp;
+
+INSERT INTO Grupo(Nombre_Grupo, URL_Imagen)
+SELECT DISTINCT "Nombre del grupo", "url del grupo"
+FROM Disco_temp;
+
+INSERT INTO Desea(Nombre_Usuario, Título_Disco, Año_publicación)
+SELECT DISTINCT "nombre de usuario", "tituloo del disco", "año lanzamiento del disco"
+FROM Usuario_quiere_temp;
+
+INSERT INTO Tiene(Nombre_Usuario, Título_Disco, Año_publicación, Año_Edición, País, Formato, Estado)
+SELECT DISTINCT "nombre de usuario", "tituloo del disco", "año lanzamiento del disco", "año edición", "país de la edición", "formato", "estado"
+FROM Usuario_tiene_temp;
+
+INSERT INTO Usuario(Nombre_Usuario, Nombre, Contraseña, Email)
+SELECT DISTINCT "Nombre de usuario", "Nombre completo", "contraseña", "email"
+FROM Usuario_temp;
+
+INSERT INTO Ediciones(Formato, País, Año_Edición)
+SELECT DISTINCT "formato", "país de la edición", "año de la edición"
+FROM Ediciones_temp;
+
+INSERT INTO Ediciones(Título_Disco, Año_publicación)
+SELECT DISTINCT "Título del disco", "fecha de lanzamiento"
+FROM Disco_temp;
+
+
+
 \echo 'Cargando datos.'
 \COPY Disco FROM 'Disco.csv' DELIMITER ',' CSV HEADER;
 \COPY Canción FROM 'Canciones.csv' DELIMITER ',' CSV HEADER;
