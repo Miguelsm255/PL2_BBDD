@@ -6,50 +6,53 @@ BEGIN;
 \echo '###~Crearemos un esquema.~###'
 CREATE SCHEMA IF NOT EXISTS TiendaDiscos;
 
+
+--SET search_path='nombre del esquema o esquemas utilizados';
+
+
 \echo '###~Creamos a continuación las tablas temporales.~###'
 CREATE TABLE IF NOT EXISTS Disco_temp(
-    id_disco INT ,
-    "Nombre del disco" TEXT ,
+    id_disco INT,
+    "Nombre del disco" TEXT,
     "fecha de lanzamiento" INT DEFAULT 1,
-    id_grupo INT ,
-    "Nombre del grupo" TEXT ,
-    "url del grupo" TEXT ,
-    géneros TEXT ,
+    id_grupo INT,
+    "Nombre del grupo" TEXT,
+    "url del grupo" TEXT,
+    géneros TEXT,
     "url portada" TEXT 
 );
 
 CREATE TABLE IF NOT EXISTS Canción_temp(
-    "id del disco" INT ,
-    "Título de la canción" TEXT ,
+    "id del disco" INT,
+    "Título de la canción" TEXT,
     duración TEXT
 );
 
-
 CREATE TABLE IF NOT EXISTS Usuario_desea_temp(
-    "nombre de usuario" TEXT ,
-    "títuloo del disco" TEXT ,
+    "nombre de usuario" TEXT,
+    "títuloo del disco" TEXT,
     "año lanzamiento del disco" INT 
 );
 
 CREATE TABLE IF NOT EXISTS Usuario_tiene_temp(
-    "nombre de usuario" TEXT ,
-    "titulo del disco" TEXT ,
+    "nombre de usuario" TEXT,
+    "titulo del disco" TEXT,
     "año lanzamiento del disco" INT,
     "año edición" INT,
     "país de edición" TEXT,
-    formato TEXT ,
+    formato TEXT,
     estado TEXT 
 );
 
 CREATE TABLE IF NOT EXISTS Usuario_temp(
-    "Nombre completo" TEXT ,
-    "Nombre de usuario" TEXT ,
-    email TEXT ,
+    "Nombre completo" TEXT,
+    "Nombre de usuario" TEXT,
+    email TEXT,
     contraseña TEXT 
 );
 
 CREATE TABLE IF NOT EXISTS Ediciones_temp(
-    "id del disco" INT ,
+    "id del disco" INT,
     "año de la edición" INT,
     "país de la edición" TEXT,
     formato TEXT 
@@ -57,21 +60,21 @@ CREATE TABLE IF NOT EXISTS Ediciones_temp(
 
 \echo '###~Tablas temporales creadas. Procedemos a definir las tablas definitivas.~###'
 CREATE TABLE IF NOT EXISTS Usuario(
-    Nombre_Usuario TEXT NOT NULL,
-    Nombre TEXT ,
-    Contraseña TEXT ,
-    Email TEXT ,
+    Nombre_Usuario TEXT,
+    Nombre TEXT,
+    Contraseña TEXT,
+    Email TEXT,
     CONSTRAINT Usuario_pk PRIMARY KEY(Nombre_Usuario)
 );
 
 CREATE TABLE IF NOT EXISTS Grupo(
-    Nombre_Grupo TEXT NOT NULL,
-    URL_Imagen TEXT ,
+    Nombre_Grupo TEXT,
+    URL_Imagen TEXT,
     CONSTRAINT Grupo_pk PRIMARY KEY(Nombre_Grupo)
 );
 
 CREATE TABLE IF NOT EXISTS Disco(
-    Título_Disco TEXT NOT NULL,
+    Título_Disco TEXT,
     Año_publicación INT DEFAULT 1,
     URL_Portada TEXT,
     Nombre_Grupo TEXT,
@@ -81,15 +84,15 @@ CREATE TABLE IF NOT EXISTS Disco(
 );
 
 CREATE TABLE IF NOT EXISTS Géneros_Disco(
-    Nombre_Género TEXT NOT NULL,
-    Título_Disco TEXT NOT NULL,
+    Nombre_Género TEXT,
+    Título_Disco TEXT,
     Año_publicación INT DEFAULT 1,  
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
 
 CREATE TABLE IF NOT EXISTS Desea(
-    Nombre_Usuario TEXT NOT NULL,
-    Título_Disco TEXT NOT NULL,
+    Nombre_Usuario TEXT,
+    Título_Disco TEXT,
     Año_publicación INT DEFAULT 1,
     CONSTRAINT Desea_pk PRIMARY KEY(Nombre_Usuario, Título_Disco, Año_publicación),
     CONSTRAINT Usuario_fk FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
@@ -99,17 +102,17 @@ CREATE TABLE IF NOT EXISTS Desea(
 CREATE TABLE IF NOT EXISTS Canción(
     Título_Canción TEXT,
     Duración TIME,
-    Título_Disco TEXT NOT NULL,
+    Título_Disco TEXT,
     Año_publicación INT DEFAULT 1, 
     CONSTRAINT Canción_pk PRIMARY KEY(Título_Canción),
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
 
 CREATE TABLE IF NOT EXISTS Ediciones(
-    Formato TEXT NOT NULL,    
-    País TEXT NOT NULL,
+    Formato TEXT,    
+    País TEXT,
     Año_Edición INT DEFAULT 1,
-    Título_Disco TEXT NOT NULL,
+    Título_Disco TEXT,
     Año_publicación INT DEFAULT 1,
     CONSTRAINT Ediciones_pk PRIMARY KEY(Formato, Año_Edición, País),
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
@@ -117,8 +120,8 @@ CREATE TABLE IF NOT EXISTS Ediciones(
 
 CREATE TABLE IF NOT EXISTS Tiene(
     Estado TEXT,
-    Nombre_Usuario TEXT NOT NULL,
-    Título_Disco TEXT NOT NULL,
+    Nombre_Usuario TEXT,
+    Título_Disco TEXT,
     Año_publicación INT DEFAULT 1, 
     Año_Edición INT,
     País TEXT,
@@ -127,8 +130,6 @@ CREATE TABLE IF NOT EXISTS Tiene(
     CONSTRAINT Usuario_fk FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
     CONSTRAINT Ediciones_fk FOREIGN KEY (Formato, Año_Edición, País) REFERENCES Ediciones(Formato, Año_Edición, País)
 );
-
-
 
 \echo '###~Cargando datos.~###'
 \COPY Disco_temp FROM 'Datos_de_discos/discos.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL '0', ENCODING 'UTF-8');
@@ -142,9 +143,6 @@ CREATE TABLE IF NOT EXISTS Tiene(
 \COPY Usuario_temp FROM 'Datos_de_discos/usuarios.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL '0', ENCODING 'UTF-8');
 
 \COPY Canción_temp FROM 'Datos_de_discos/canciones.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL 'NULL', ENCODING 'UTF-8');
-
-
-
 
 \echo '###~Tablas creadas. Procedemos a unirlas.~###'
 INSERT INTO Grupo(Nombre_Grupo, URL_Imagen)
@@ -194,7 +192,6 @@ SELECT DISTINCT
 FROM Ediciones_temp et
 JOIN Disco_temp dt ON et."id del disco" = dt.id_disco
 ON CONFLICT (Formato, País, Año_Edición) DO NOTHING;
-
 
 INSERT INTO Tiene(Nombre_Usuario, Título_Disco, Año_publicación, Año_Edición, País, Formato, Estado)
 SELECT DISTINCT 
