@@ -3,11 +3,10 @@
 SET client_encoding = 'UTF8';
 
 BEGIN;
-\echo 'Crearemos un esquema.'
+\echo '###~Crearemos un esquema.~###'
 CREATE SCHEMA IF NOT EXISTS TiendaDiscos;
 
-
-\echo 'Creamos a continuación las tablas temporales.'
+\echo '###~Creamos a continuación las tablas temporales.~###'
 CREATE TABLE IF NOT EXISTS Disco_temp(
     id_disco INT NOT NULL,
     "Nombre del disco" TEXT NOT NULL,
@@ -35,13 +34,13 @@ CREATE TABLE IF NOT EXISTS Ediciones_temp(
 CREATE TABLE IF NOT EXISTS Usuario_desea_temp(
     "nombre de usuario" TEXT NOT NULL,
     "titulo del disco" TEXT NOT NULL,
-    "año lanzamiento del disco" INT NOT NULL
+    "año lanzamiento del disco" INT 
 );
 
 CREATE TABLE IF NOT EXISTS Usuario_tiene_temp(
     "nombre de usuario" TEXT NOT NULL,
     "titulo del disco" TEXT NOT NULL,
-    "año lanzamiento del disco" INT NOT NULL,
+    "año lanzamiento del disco" INT,
     "año edición" INT,
     "país de edición" TEXT,
     formato TEXT NOT NULL,
@@ -55,8 +54,7 @@ CREATE TABLE IF NOT EXISTS Usuario_temp(
     contraseña TEXT NOT NULL
 );
 
-
-\echo 'Tablas temporales creadas. Procedemos a definir las tablas definitivas.'
+\echo '###~Tablas temporales creadas. Procedemos a definir las tablas definitivas.~###'
 CREATE TABLE IF NOT EXISTS Usuario(
     Nombre_Usuario TEXT NOT NULL,
     Nombre TEXT NOT NULL,
@@ -89,11 +87,10 @@ CREATE TABLE IF NOT EXISTS Géneros_Disco(
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
 
-
 CREATE TABLE IF NOT EXISTS Desea(
     Nombre_Usuario TEXT NOT NULL,
     Título_Disco TEXT NOT NULL,
-    Año_publicación INT NOT NULL,
+    Año_publicación INT,
     CONSTRAINT Desea_pk PRIMARY KEY(Nombre_Usuario, Título_Disco, Año_publicación),
     CONSTRAINT Usuario_fk FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
@@ -112,7 +109,7 @@ CREATE TABLE IF NOT EXISTS Tiene(
     Estado TEXT NOT NULL,
     Nombre_Usuario TEXT NOT NULL,
     Título_Disco TEXT NOT NULL,
-    Año_publicación INT NOT NULL,
+    Año_publicación INT,
     CONSTRAINT Tiene_pk PRIMARY KEY(Nombre_Usuario, Título_Disco, Año_publicación),
     CONSTRAINT Usuario_fk FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
@@ -128,29 +125,22 @@ CREATE TABLE IF NOT EXISTS Ediciones(
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
 
-\echo 'Ajustando el formato TIME.'
-INSERT INTO Canción_temp("id del disco", "Título de la Canción", duración)
-SELECT 
-"id del disco", 
-"Título de la Canción",
-DATE_FORMAT(duración, '%h:%i:%s') AS duración
-FROM 
-    Canción_temp; 
+\echo '###~Ajustando el formato TIME.~###'
 
-UPDATE Canción
-SET duración = DATE_FORMAT(Canción.duración, '%h:%i:%s') AS duración
-FROM Canción_temp
-WHERE Canción.Título_Canción = Canción_temp."Título de la Canción";
+MAKE_INTERVAL(mins => SPLIT_PART(Canción_temp.duración, ':', 1)::INTEGER,
+                secs => SPLIT_PART(Canción_temp.duración, ':', 2)::INTEGER)::TIME AS duración;
 
-\echo 'Cargando datos.'
+\echo '¡El formato TIME ha sido ajustado de manera exitosa!'
+
+\echo '###~Cargando datos.~###'
 \COPY Disco_temp FROM 'Datos_de_discos/discos.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL '0', ENCODING 'UTF-8');
-\COPY Canción_temp FROM 'Datos_de_discos/canciones.csv'  WITH (FORMAT csv, HEADER, DELIMITER E';', NULL 'NULL', ENCODING 'UTF-8');
 \COPY Ediciones_temp FROM 'Datos_de_discos/ediciones.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL '0', ENCODING 'UTF-8');
 \COPY Usuario_desea_temp FROM 'Datos_de_discos/usuario_desea_disco.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL '0', ENCODING 'UTF-8');
 \COPY Usuario_tiene_temp FROM 'Datos_de_discos/usuario_tiene_edicion.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL '0', ENCODING 'UTF-8');
 \COPY Usuario_temp FROM 'Datos_de_discos/usuarios.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL '0', ENCODING 'UTF-8');
+\COPY Canción_temp FROM 'Datos_de_discos/canciones.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL 'NULL', ENCODING 'UTF-8');
 
-\echo 'Tablas creadas. Procedemos a unirlas.'
+\echo '###~Tablas creadas. Procedemos a unirlas.~###'
 INSERT INTO Disco(Título_Disco, Año_publicación, URL_Portada, Nombre_Grupo)
 SELECT DISTINCT "Nombre del disco", "fecha de lanzamiento", "url portada", "Nombre del grupo"
 FROM Disco_temp;
