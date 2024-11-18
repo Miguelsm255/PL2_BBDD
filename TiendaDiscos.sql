@@ -3,14 +3,16 @@
 SET client_encoding = 'UTF8';
 
 BEGIN;
+\echo ''
 \echo '###~Crearemos un esquema.~###'
+\echo ''
 CREATE SCHEMA IF NOT EXISTS TiendaDiscos;
-
 
 --SET search_path='nombre del esquema o esquemas utilizados';
 
-
+\echo ''
 \echo '###~Creamos a continuación las tablas temporales.~###'
+\echo ''
 CREATE TABLE IF NOT EXISTS Disco_temp(
     id_disco INT,
     "Nombre del disco" TEXT,
@@ -58,7 +60,9 @@ CREATE TABLE IF NOT EXISTS Ediciones_temp(
     formato TEXT 
 );
 
+\echo ''
 \echo '###~Tablas temporales creadas. Procedemos a definir las tablas definitivas.~###'
+\echo ''
 CREATE TABLE IF NOT EXISTS Usuario(
     Nombre_Usuario TEXT,
     Nombre TEXT,
@@ -111,9 +115,9 @@ CREATE TABLE IF NOT EXISTS Canción(
 CREATE TABLE IF NOT EXISTS Ediciones(
     Formato TEXT,    
     País TEXT,
-    Año_Edición INT DEFAULT 1,
+    Año_Edición INT,
     Título_Disco TEXT,
-    Año_publicación INT DEFAULT 1,
+    Año_publicación INT,
     CONSTRAINT Ediciones_pk PRIMARY KEY(Formato, Año_Edición, País),
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
@@ -122,7 +126,7 @@ CREATE TABLE IF NOT EXISTS Tiene(
     Estado TEXT,
     Nombre_Usuario TEXT,
     Título_Disco TEXT,
-    Año_publicación INT DEFAULT 1, 
+    Año_publicación INT, 
     Año_Edición INT,
     País TEXT,
     Formato TEXT,
@@ -131,7 +135,9 @@ CREATE TABLE IF NOT EXISTS Tiene(
     CONSTRAINT Ediciones_fk FOREIGN KEY (Formato, Año_Edición, País) REFERENCES Ediciones(Formato, Año_Edición, País)
 );
 
+\echo ''
 \echo '###~Cargando datos.~###'
+\echo ''
 \COPY Disco_temp FROM 'Datos_de_discos/discos.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL '0', ENCODING 'UTF-8');
 
 \COPY Ediciones_temp FROM 'Datos_de_discos/ediciones.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL '0', ENCODING 'UTF-8');
@@ -144,7 +150,10 @@ CREATE TABLE IF NOT EXISTS Tiene(
 
 \COPY Canción_temp FROM 'Datos_de_discos/canciones.csv' WITH (FORMAT csv, HEADER, DELIMITER E';', NULL 'NULL', ENCODING 'UTF-8');
 
+\echo ''
 \echo '###~Tablas creadas. Procedemos a unirlas.~###'
+\echo ''
+
 INSERT INTO Grupo(Nombre_Grupo, URL_Imagen)
 SELECT DISTINCT 
     "Nombre del grupo", 
@@ -154,16 +163,16 @@ FROM Disco_temp;
 INSERT INTO Disco(Título_Disco, Año_publicación, URL_Portada, Nombre_Grupo)
 SELECT DISTINCT 
     "Nombre del disco", 
-    COALESCE("fecha de lanzamiento", 1), 
+    COALESCE("fecha de lanzamiento", 1) AS Año_publicación, 
     "url portada", 
     "Nombre del grupo"
 FROM Disco_temp;
 
 INSERT INTO Géneros_Disco(Nombre_Género, Título_Disco, Año_publicación)
 SELECT DISTINCT 
-    "géneros", 
+    géneros, 
     "Nombre del disco", 
-    COALESCE("fecha de lanzamiento", 1)
+    COALESCE("fecha de lanzamiento", 1) AS Año_publicación
 FROM Disco_temp;
 
 INSERT INTO Usuario(Nombre_Usuario, Nombre, Contraseña, Email)
@@ -178,7 +187,7 @@ INSERT INTO Desea(Nombre_Usuario, Título_Disco, Año_publicación)
 SELECT DISTINCT 
     "nombre de usuario", 
     "títuloo del disco", 
-    COALESCE("año lanzamiento del disco", 1)
+    COALESCE("año lanzamiento del disco", 1) AS Año_publicación
 FROM Usuario_desea_temp 
 JOIN Usuario_temp ON Usuario_desea_temp."nombre de usuario" = Usuario_temp."Nombre de usuario";
 
@@ -186,7 +195,7 @@ INSERT INTO Ediciones(Formato, País, Año_Edición, Título_Disco, Año_publica
 SELECT DISTINCT 
     et."formato", 
     et."país de la edición", 
-    COALESCE(et."año de la edición", 1) AS Año_Edición,
+    COALESCE("año de la edición", 1) AS Año_Edición,
     dt."Nombre del disco",
     COALESCE(dt."fecha de lanzamiento", 1) AS Año_publicación
 FROM Ediciones_temp et
@@ -197,27 +206,53 @@ INSERT INTO Tiene(Nombre_Usuario, Título_Disco, Año_publicación, Año_Edició
 SELECT DISTINCT 
     "nombre de usuario", 
     "titulo del disco", 
-    COALESCE("año lanzamiento del disco", 1), 
-    COALESCE("año edición", 1),
+    COALESCE("año lanzamiento del disco", 1) AS Año_publicación, 
+    COALESCE("año edición", 1) AS Año_Edición, 
     "país de edición", 
-    Ediciones_temp."formato", 
+    et."formato", 
     "estado"
-FROM Usuario_tiene_temp 
-JOIN Ediciones_temp ON Usuario_tiene_temp."año edición" = Ediciones_temp."año de la edición"
-AND Usuario_tiene_temp."país de edición" = Ediciones_temp."país de la edición"
-AND Usuario_tiene_temp.formato = Ediciones_temp.formato
-JOIN Usuario_temp ON Usuario_tiene_temp."nombre de usuario" = Usuario_temp."Nombre de usuario";
+FROM Usuario_tiene_temp ut
+JOIN Ediciones_temp et 
+    ON ut."país de edición" = et."país de la edición"
+    AND ut.formato = et.formato
+JOIN Usuario_temp um ON ut."nombre de usuario" = um."Nombre de usuario";
 
 INSERT INTO Canción(Título_Canción, Duración, Título_Disco, Año_publicación)
 SELECT DISTINCT 
-    COALESCE("Título de la canción", 'Untitled'),              
+    COALESCE("Título de la canción", 'Untitled') AS Título_Canción,              
     MAKE_INTERVAL(
         mins => SPLIT_PART(CAST(Canción_temp.duración AS TEXT), ':', 1)::INTEGER, -- Extraer los minutos
         secs => SPLIT_PART(CAST(Canción_temp.duración AS TEXT), ':', 2)::INTEGER  -- Extraer los segundos
     )::TIME AS duración,
     Disco_temp."Nombre del disco",
-    COALESCE(Disco_temp."fecha de lanzamiento", 1)
+    COALESCE(Disco_temp."fecha de lanzamiento", 1) AS Año_publicación
 FROM Canción_temp JOIN Disco_temp ON Canción_temp."id del disco" = Disco_temp.id_disco
 ON CONFLICT (Título_Canción) DO NOTHING;
+
+\echo ''
+\echo '###~Datos cargados. Procedemos a eliminar las tablas temporales.~###'
+\echo ''
+
+DROP TABLE Disco_temp;
+DROP TABLE Canción_temp;
+DROP TABLE Usuario_desea_temp;
+DROP TABLE Usuario_tiene_temp;
+DROP TABLE Usuario_temp;
+DROP TABLE Ediciones_temp;
+
+\echo ''
+\echo '###~Tablas temporales eliminadas con éxito.~###'
+\echo ''
+\echo 'FASE 1 TERMINADA'
+\echo ''
+\echo '###~INICIO FASE 2: CONSULTAS~###'
+\echo ''
+
+
+
+
+
+
+
 
 ROLLBACK; 
