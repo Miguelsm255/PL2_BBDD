@@ -247,12 +247,5 @@ DROP TABLE Ediciones_temp;
 \echo ''
 \echo '###~INICIO FASE 2: CONSULTAS~###'
 \echo ''
-
-
-
-
-
-
-
-
+ 
 ROLLBACK; 
