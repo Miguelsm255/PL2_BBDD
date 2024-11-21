@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS Géneros_Disco(
     Nombre_Género TEXT,
     Título_Disco TEXT,
     Año_publicación INT DEFAULT 1,  
+    CONSTRAINT Géneros_Disco_pk PRIMARY KEY(Nombre_Género, Título_Disco, Año_publicación),
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
 
@@ -108,7 +109,7 @@ CREATE TABLE IF NOT EXISTS Canción(
     Duración TIME,
     Título_Disco TEXT,
     Año_publicación INT DEFAULT 1, 
-    CONSTRAINT Canción_pk PRIMARY KEY(Título_Canción),
+    CONSTRAINT Canción_pk PRIMARY KEY(Título_Canción, Título_Disco, Año_publicación),
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
 
@@ -168,12 +169,16 @@ SELECT DISTINCT
     "Nombre del grupo"
 FROM Disco_temp;
 
-INSERT INTO Géneros_Disco(Nombre_Género, Título_Disco, Año_publicación)
-SELECT DISTINCT 
-    géneros, 
-    "Nombre del disco", 
-    COALESCE("fecha de lanzamiento", 1) AS Año_publicación
-FROM Disco_temp;
+INSERT INTO Géneros_Disco (Nombre_Género, Título_Disco, Año_publicación)
+SELECT DISTINCT
+    TRIM(BOTH ' ' FROM regexp_replace(género, '''', '', 'g')) AS Nombre_Género,
+    Disco_temp."Nombre del disco" AS Título_Disco,
+    COALESCE(Disco_temp."fecha de lanzamiento", 1) AS Año_publicación
+FROM Disco_temp, 
+    regexp_split_to_table(
+        TRIM(BOTH '[]' FROM Disco_temp.géneros), ', '
+    ) AS género;
+
 
 INSERT INTO Usuario(Nombre_Usuario, Nombre, Contraseña, Email)
 SELECT DISTINCT 
@@ -188,7 +193,7 @@ SELECT DISTINCT
     "nombre de usuario", 
     "títuloo del disco", 
     COALESCE("año lanzamiento del disco", 1) AS Año_publicación
-FROM Usuario_desea_temp 
+FROM Usuario_desea_temp
 JOIN Usuario_temp ON Usuario_desea_temp."nombre de usuario" = Usuario_temp."Nombre de usuario";
 
 INSERT INTO Ediciones(Formato, País, Año_Edición, Título_Disco, Año_publicación)
@@ -227,7 +232,7 @@ SELECT DISTINCT
     Disco_temp."Nombre del disco",
     COALESCE(Disco_temp."fecha de lanzamiento", 1) AS Año_publicación
 FROM Canción_temp JOIN Disco_temp ON Canción_temp."id del disco" = Disco_temp.id_disco
-ON CONFLICT (Título_Canción) DO NOTHING;
+ON CONFLICT (Título_Canción, Título_Disco, Año_publicación) DO NOTHING;
 
 \echo ''
 \echo '###~Datos cargados. Procedemos a eliminar las tablas temporales.~###'
@@ -247,5 +252,25 @@ DROP TABLE Ediciones_temp;
 \echo ''
 \echo '###~INICIO FASE 2: CONSULTAS~###'
 \echo ''
- 
+
+
+SELECT 
+    Disco.Título_Disco, 
+    Disco.Año_publicación
+FROM Disco
+JOIN Canción ON Disco.Título_Disco = Canción.Título_Disco
+AND Disco.Año_publicación = Canción.Año_publicación
+GROUP BY Disco.Título_Disco, Disco.Año_publicación
+HAVING SUM(Canción.Duración) = (
+    SELECT 
+        MAX(TotalDuración)
+    FROM (
+        SELECT SUM(Canción.Duración) AS TotalDuración
+        FROM Canción
+        JOIN Disco ON Canción.Título_Disco = Disco.Título_Disco
+        GROUP BY Canción.Título_Disco, Disco.Año_publicación
+    ) AS DuracionesTotales
+);
+
+
 ROLLBACK; 

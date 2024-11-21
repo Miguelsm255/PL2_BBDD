@@ -29,8 +29,17 @@ FROM Disco
 JOIN Canción ON Disco.Título_Disco = Canción.Título_Disco
 AND Disco.Año_publicación = Canción.Año_publicación
 GROUP BY Disco.Título_Disco, Disco.Año_publicación
-ORDER BY SUM(EXTRACT(EPOCH FROM Canción.Duración)) DESC
-LIMIT 1;
+HAVING SUM(Canción.Duración) = (
+    SELECT 
+        MAX(TotalDuración)
+    FROM (
+        SELECT SUM(Canción.Duración) AS TotalDuración
+        FROM Canción
+        JOIN Disco ON Canción.Título_Disco = Disco.Título_Disco
+        GROUP BY Canción.Título_Disco, Disco.Año_publicación
+    ) AS DuracionesTotales
+);
+
 
 --4. De los discos que tiene en su lista de deseos el usuario Juan García Gómez, indicar el nombre de los grupos musicales que los interpretan.
 
@@ -149,4 +158,4 @@ FROM Usuario
 JOIN Tiene ON Usuario.Nombre_Usuario = Tiene.Nombre_Usuario
 GROUP BY Usuario.Nombre
 ORDER BY COUNT(Tiene.Título_Disco) DESC
-LIMIT 1;
+LIMIT 1;    --CORREGIR
