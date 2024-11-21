@@ -82,9 +82,9 @@ SELECT
     Disco.Título_Disco, 
     Disco.Año_publicación, 
     TO_CHAR( 
-        INTERVAL '1 second' * SUM(EXTRACT(Canción.Duración)), 
+        SUM(Canción.Duración), 
         'MI:SS'
-    ) AS "Duración total"
+    ) AS "Duración total del disco."
 FROM Disco
 JOIN Canción ON Disco.Título_Disco = Canción.Título_Disco
 AND Disco.Año_publicación = Canción.Año_publicación
@@ -152,10 +152,21 @@ HAVING COUNT(Ediciones.Título_Disco) > 5;
 --12. Lista el usuario que más discos, contando todas sus ediciones, tiene en la base de datos.
 
 SELECT 
-    Usuario.Nombre, 
-    COUNT(Tiene.Título_Disco) AS "Número de discos"
-FROM Usuario
-JOIN Tiene ON Usuario.Nombre_Usuario = Tiene.Nombre_Usuario
-GROUP BY Usuario.Nombre
-ORDER BY COUNT(Tiene.Título_Disco) DESC
-LIMIT 1;    --CORREGIR
+    Nombre, 
+    "Número de discos"
+FROM (
+    SELECT 
+        Usuario.Nombre, 
+        COUNT(Tiene.Título_Disco) AS "Número de discos"
+    FROM Usuario
+    JOIN Tiene ON Usuario.Nombre_Usuario = Tiene.Nombre_Usuario
+    GROUP BY Usuario.Nombre
+) AS Subquery
+WHERE "Número de discos" = (
+    SELECT MAX("Número de discos")
+    FROM (
+        SELECT COUNT(Título_Disco) AS "Número de discos"
+        FROM Tiene
+        GROUP BY Nombre_Usuario
+    ) AS MaxDiscos
+);

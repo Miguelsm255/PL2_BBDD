@@ -253,23 +253,16 @@ DROP TABLE Ediciones_temp;
 \echo '###~INICIO FASE 2: CONSULTAS~###'
 \echo ''
 
-
-
 SELECT 
-    Disco.Título_Disco, 
-    Disco.Año_publicación, 
-    TO_CHAR( 
-        SUM(Canción.Duración),  -- Sumar las duraciones directamente
-        'MI:SS'
-    ) AS "Duración total"
-FROM Disco
-JOIN Canción ON Disco.Título_Disco = Canción.Título_Disco
-AND Disco.Año_publicación = Canción.Año_publicación
-JOIN Ediciones ON Disco.Título_Disco = Ediciones.Título_Disco
-WHERE Ediciones.Año_Edición < 2000
-GROUP BY Disco.Título_Disco, Disco.Año_publicación
-ORDER BY Disco.Año_publicación;
-
-
+    Usuario.Nombre, 
+    COUNT(Tiene.Título_Disco) AS "Número de ediciones",
+    MIN(Disco.Año_publicación) AS "Año de lanzamiento del disco más antiguo",
+    MAX(Disco.Año_publicación) AS "Año de lanzamiento del disco más nuevo",
+    ROUND(AVG(Disco.Año_publicación), 2) AS "Medio de años del lanzamiento de los discos"
+FROM Usuario
+JOIN Tiene ON Usuario.Nombre_Usuario = Tiene.Nombre_Usuario
+JOIN Disco ON Tiene.Título_Disco = Disco.Título_Disco
+AND Tiene.Año_publicación = Disco.Año_publicación
+GROUP BY Usuario.Nombre;
 
 ROLLBACK; 
