@@ -254,23 +254,22 @@ DROP TABLE Ediciones_temp;
 \echo ''
 
 
+
 SELECT 
     Disco.Título_Disco, 
-    Disco.Año_publicación
+    Disco.Año_publicación, 
+    TO_CHAR( 
+        SUM(Canción.Duración),  -- Sumar las duraciones directamente
+        'MI:SS'
+    ) AS "Duración total"
 FROM Disco
 JOIN Canción ON Disco.Título_Disco = Canción.Título_Disco
 AND Disco.Año_publicación = Canción.Año_publicación
+JOIN Ediciones ON Disco.Título_Disco = Ediciones.Título_Disco
+WHERE Ediciones.Año_Edición < 2000
 GROUP BY Disco.Título_Disco, Disco.Año_publicación
-HAVING SUM(Canción.Duración) = (
-    SELECT 
-        MAX(TotalDuración)
-    FROM (
-        SELECT SUM(Canción.Duración) AS TotalDuración
-        FROM Canción
-        JOIN Disco ON Canción.Título_Disco = Disco.Título_Disco
-        GROUP BY Canción.Título_Disco, Disco.Año_publicación
-    ) AS DuracionesTotales
-);
+ORDER BY Disco.Año_publicación;
+
 
 
 ROLLBACK; 

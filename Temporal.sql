@@ -82,7 +82,7 @@ SELECT
     Disco.Título_Disco, 
     Disco.Año_publicación, 
     TO_CHAR( 
-        INTERVAL '1 second' * SUM(EXTRACT(EPOCH FROM Canción.Duración)), 
+        INTERVAL '1 second' * SUM(EXTRACT(Canción.Duración)), 
         'MI:SS'
     ) AS "Duración total"
 FROM Disco
