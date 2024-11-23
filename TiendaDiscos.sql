@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS Tiene(
     Año_Edición INT,
     País TEXT,
     Formato TEXT,
-    CONSTRAINT Tiene_pk PRIMARY KEY(Estado, Nombre_Usuario, Título_Disco, Año_publicación, Año_Edición, País, Formato),
+    CONSTRAINT Tiene_pk PRIMARY KEY(Nombre_Usuario, Título_Disco, Año_publicación, Año_Edición, País, Formato),
     CONSTRAINT Usuario_fk FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
     CONSTRAINT Ediciones_fk FOREIGN KEY (Formato, Año_Edición, País, Título_Disco, Año_publicación) REFERENCES Ediciones(Formato, Año_Edición, País, Título_Disco, Año_publicación)
 );
