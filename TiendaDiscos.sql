@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS Ediciones(
     Año_Edición INT,
     Título_Disco TEXT,
     Año_publicación INT,
-    CONSTRAINT Ediciones_pk PRIMARY KEY(Formato, Año_Edición, País),
+    CONSTRAINT Ediciones_pk PRIMARY KEY(Formato, Año_Edición, País, Título_Disco, Año_publicación),
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
 
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS Tiene(
     Formato TEXT,
     CONSTRAINT Tiene_pk PRIMARY KEY(Estado, Nombre_Usuario, Título_Disco, Año_publicación, Año_Edición, País, Formato),
     CONSTRAINT Usuario_fk FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
-    CONSTRAINT Ediciones_fk FOREIGN KEY (Formato, Año_Edición, País) REFERENCES Ediciones(Formato, Año_Edición, País)
+    CONSTRAINT Ediciones_fk FOREIGN KEY (Formato, Año_Edición, País, Título_Disco, Año_publicación) REFERENCES Ediciones(Formato, Año_Edición, País, Título_Disco, Año_publicación)
 );
 
 \echo ''
@@ -205,7 +205,7 @@ SELECT DISTINCT
     COALESCE(dt."fecha de lanzamiento", 1) AS Año_publicación
 FROM Ediciones_temp et
 JOIN Disco_temp dt ON et."id del disco" = dt.id_disco
-ON CONFLICT (Formato, País, Año_Edición) DO NOTHING;
+ON CONFLICT (Formato, País, Año_Edición, Título_Disco, Año_publicación) DO NOTHING;
 
 INSERT INTO Tiene(Nombre_Usuario, Título_Disco, Año_publicación, Año_Edición, País, Formato, Estado)
 SELECT DISTINCT 
@@ -253,16 +253,14 @@ DROP TABLE Ediciones_temp;
 \echo '###~INICIO FASE 2: CONSULTAS~###'
 \echo ''
 
-SELECT 
-    Usuario.Nombre, 
-    COUNT(Tiene.Título_Disco) AS "Número de ediciones",
-    MIN(Disco.Año_publicación) AS "Año de lanzamiento del disco más antiguo",
-    MAX(Disco.Año_publicación) AS "Año de lanzamiento del disco más nuevo",
-    ROUND(AVG(Disco.Año_publicación), 2) AS "Medio de años del lanzamiento de los discos"
-FROM Usuario
-JOIN Tiene ON Usuario.Nombre_Usuario = Tiene.Nombre_Usuario
-JOIN Disco ON Tiene.Título_Disco = Disco.Título_Disco
-AND Tiene.Año_publicación = Disco.Año_publicación
-GROUP BY Usuario.Nombre;
+SELECT DISTINCT 
+    Tiene.Formato, 
+    Tiene.País, 
+    Tiene.Año_Edición, 
+    Tiene.Título_Disco
+FROM Tiene
+JOIN Usuario ON Tiene.Nombre_Usuario = Usuario.Nombre_Usuario
+WHERE Usuario.Nombre = 'Juan García Gómez' AND Tiene.Estado IN ('NM', 'M');
+
 
 ROLLBACK; 
