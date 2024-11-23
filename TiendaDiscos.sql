@@ -226,8 +226,8 @@ INSERT INTO Canción(Título_Canción, Duración, Título_Disco, Año_publicaci�
 SELECT DISTINCT 
     COALESCE("Título de la canción", 'Untitled') AS Título_Canción,              
     MAKE_INTERVAL(
-        mins => SPLIT_PART(CAST(Canción_temp.duración AS TEXT), ':', 1)::INTEGER, -- Extraer los minutos
-        secs => SPLIT_PART(CAST(Canción_temp.duración AS TEXT), ':', 2)::INTEGER  -- Extraer los segundos
+        mins => SPLIT_PART(CAST(Canción_temp.duración AS TEXT), ':', 1)::INTEGER, 
+        secs => SPLIT_PART(CAST(Canción_temp.duración AS TEXT), ':', 2)::INTEGER 
     )::TIME AS duración,
     Disco_temp."Nombre del disco",
     COALESCE(Disco_temp."fecha de lanzamiento", 1) AS Año_publicación
