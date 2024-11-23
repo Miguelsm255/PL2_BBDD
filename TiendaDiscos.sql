@@ -16,7 +16,7 @@ CREATE SCHEMA IF NOT EXISTS TiendaDiscos;
 CREATE TABLE IF NOT EXISTS Disco_temp(
     id_disco INT,
     "Nombre del disco" TEXT,
-    "fecha de lanzamiento" INT DEFAULT 1,
+    "fecha de lanzamiento" INT,
     id_grupo INT,
     "Nombre del grupo" TEXT,
     "url del grupo" TEXT,
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS Grupo(
 
 CREATE TABLE IF NOT EXISTS Disco(
     Título_Disco TEXT,
-    Año_publicación INT DEFAULT 1,
+    Año_publicación INT,
     URL_Portada TEXT,
     Nombre_Grupo TEXT,
     CONSTRAINT Disco_pk PRIMARY KEY(Título_Disco, Año_publicación),
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS Disco(
 CREATE TABLE IF NOT EXISTS Géneros_Disco(
     Nombre_Género TEXT,
     Título_Disco TEXT,
-    Año_publicación INT DEFAULT 1,  
+    Año_publicación INT,  
     CONSTRAINT Géneros_Disco_pk PRIMARY KEY(Nombre_Género, Título_Disco, Año_publicación),
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS Géneros_Disco(
 CREATE TABLE IF NOT EXISTS Desea(
     Nombre_Usuario TEXT,
     Título_Disco TEXT,
-    Año_publicación INT DEFAULT 1,
+    Año_publicación INT,
     CONSTRAINT Desea_pk PRIMARY KEY(Nombre_Usuario, Título_Disco, Año_publicación),
     CONSTRAINT Usuario_fk FOREIGN KEY(Nombre_Usuario) REFERENCES Usuario(Nombre_Usuario), 
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS Canción(
     Título_Canción TEXT,
     Duración TIME,
     Título_Disco TEXT,
-    Año_publicación INT DEFAULT 1, 
+    Año_publicación INT, 
     CONSTRAINT Canción_pk PRIMARY KEY(Título_Canción, Título_Disco, Año_publicación),
     CONSTRAINT Disco_fk FOREIGN KEY(Título_Disco, Año_publicación) REFERENCES Disco(Título_Disco, Año_publicación)
 );
