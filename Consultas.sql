@@ -173,10 +173,11 @@ SELECT DISTINCT
     Tiene.Formato, 
     Tiene.País, 
     Tiene.Año_Edición, 
+    Tiene.Año_publicación,
     Tiene.Título_Disco
 FROM Tiene
 JOIN Usuario ON Tiene.Nombre_Usuario = Usuario.Nombre_Usuario
-WHERE Usuario.Nombre = 'Juan García Gómez' AND Tiene.Estado IN ('NM', 'M');
+WHERE Usuario.Nombre = 'Luis Gómez García' AND Tiene.Estado IN ('NM', 'M');
 
 --10. Listar todos los usuarios junto al número de ediciones que tiene de todos los discos junto al año de lanzamiento de su disco más antiguo, el año de lanzamiento de su disco más nuevo, y el año medio de todos sus discos de su colección.
 
@@ -215,7 +216,7 @@ SELECT DISTINCT
     Grupo.Nombre_Grupo
 FROM Grupo
 JOIN Disco ON Grupo.Nombre_Grupo = Disco.Nombre_Grupo
-JOIN Ediciones ON Disco.Año_publicación = Ediciones.Año_publicación
+JOIN Ediciones ON Disco.Año_publicación = Ediciones.Año_publicación AND Disco.Título_Disco = Ediciones.Título_Disco
 GROUP BY Grupo.Nombre_Grupo
 HAVING COUNT(Ediciones.Título_Disco) > 5;
 
