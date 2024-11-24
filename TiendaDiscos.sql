@@ -253,14 +253,16 @@ DROP TABLE Ediciones_temp;
 \echo '###~INICIO FASE 2: CONSULTAS~###'
 \echo ''
 
-SELECT DISTINCT 
-    Tiene.Formato, 
-    Tiene.País, 
-    Tiene.Año_Edición, 
-    Tiene.Título_Disco
-FROM Tiene
-JOIN Usuario ON Tiene.Nombre_Usuario = Usuario.Nombre_Usuario
-WHERE Usuario.Nombre = 'Juan García Gómez' AND Tiene.Estado IN ('NM', 'M');
+
+
+
+
+
+
+
+
+
+
 
 
 ROLLBACK; 
