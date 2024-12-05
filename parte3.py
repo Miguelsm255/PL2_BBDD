@@ -37,7 +37,7 @@ def main():
         conn = psycopg2.connect(connstring)
 
         cur = conn.cursor()
-        query = 'SELECT Título_Disco FROM disco'
+        query = 'SELECT Nombre_Usuario FROM Usuario'
         cur.execute(query)
         for record in cur.fetchall():
             print(record)
