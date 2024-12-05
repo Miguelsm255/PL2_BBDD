@@ -1,0 +1,12 @@
+Esquemas:
+Cluster donde tengo varias bases de datos. 
+Las databases tienen tablas que están asociados a esquemas.
+Por defecto, todas las tablas se crean en el esquema público.
+Si quiero crear un usuario que no pueda crear tablas. Hay que quitar los privilegios a public y luego hay que quitar 
+los privilegios al usuario y luego hay que devolver los permisos al usuario.
+Sin embargo, si uso en esquema que no sea public, le puedes quitar el permiso de creación
+de objetos y ya está.
+
+
+PARTE USERS: Script de creación de usaurios, documentación y SQL con pruebas que hayamos hecho 
+(Aunque mejor en scripts separados.)

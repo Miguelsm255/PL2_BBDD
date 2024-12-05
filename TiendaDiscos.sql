@@ -265,4 +265,4 @@ DROP TABLE Ediciones_temp;
 
 
 
-ROLLBACK; 
+COMMIT; 
